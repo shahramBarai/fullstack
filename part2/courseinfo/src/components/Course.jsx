@@ -1,33 +1,32 @@
-const Part = (props) => {
-  return (
-    <p>
-      {props.name} {props.exercises}
-    </p>
-  );
-};
+const Header = ({ course }) => <h1>{course}</h1>;
 
-const Content = (props) => {
+const Part = ({ name, exercises }) => (
+  <p>
+    {name} {exercises}
+  </p>
+);
+
+const Content = ({ parts }) => {
   return (
     <>
-      {props.parts.map((part, index) => (
+      {parts.map((part, index) => (
         <Part key={index} name={part.name} exercises={part.exercises} />
       ))}
     </>
   );
 };
 
-const Total = (props) => {
-  let total = 0;
-  props.parts.forEach((part) => (total += part.exercises));
-  return <p>Number of exercises {total}</p>;
+const Total = ({ parts }) => {
+  const total = parts.reduce((sum, part) => sum + part.exercises, 0);
+  return <p style={{ fontWeight: "bold" }}>total of {total} exercises</p>;
 };
 
 const Course = ({ course }) => {
   return (
     <div>
-      <h1>{course.name}</h1>
+      <Header course={course.name} />
       <Content parts={course.parts} />
-      {/* <Total parts={course.parts} /> */}
+      <Total parts={course.parts} />
     </div>
   );
 };
