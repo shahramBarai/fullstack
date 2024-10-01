@@ -1,4 +1,7 @@
 import { useState } from "react";
+import Filter from "./components/Filter";
+import PersonForm from "./components/PersonForm";
+import Persons from "./components/Persons";
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -8,69 +11,15 @@ const App = () => {
     { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 },
   ]);
   const [filter, setFilter] = useState("");
-  const [newName, setNewName] = useState("");
-  const [newNumber, setNewNumber] = useState("");
-
-  const onFilterChange = (event) => {
-    setFilter(event.target.value);
-  };
-
-  const onNameChange = (event) => {
-    setNewName(event.target.value);
-  };
-
-  const onNumberChange = (event) => {
-    setNewNumber(event.target.value);
-  };
-
-  const handleAddPerson = (event) => {
-    event.preventDefault();
-    if (newName === "" || newNumber === "") {
-      alert("Please enter name and number");
-      return;
-    }
-    if (persons.find((person) => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
-      return;
-    }
-    if (persons.find((person) => person.number === newNumber)) {
-      alert(`${newNumber} is already occupied`);
-      return;
-    }
-    setPersons(persons.concat({ name: newName, number: newNumber }));
-    setNewName("");
-    setNewNumber("");
-  };
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter shown with <input value={filter} onChange={onFilterChange} />
-      </div>
-      <form>
-        <div>
-          name: <input value={newName} onChange={onNameChange} />
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={onNumberChange} />
-        </div>
-        <div>
-          <button type="submit" onClick={handleAddPerson}>
-            Add
-          </button>
-        </div>
-      </form>
+      <Filter value={filter} setFilter={setFilter} />
+      <h3>Add a new</h3>
+      <PersonForm persons={persons} setPersons={setPersons} />
       <h2>Numbers</h2>
-      {persons.map((person) => {
-        if (person.name.toLowerCase().includes(filter.toLowerCase())) {
-          return (
-            <div key={person.name}>
-              {person.name} {person.number}
-            </div>
-          );
-        }
-      })}
+      <Persons persons={persons} filter={filter} />
     </div>
   );
 };
