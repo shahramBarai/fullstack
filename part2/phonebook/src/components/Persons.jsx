@@ -1,17 +1,21 @@
 import personsService from "../services/persons";
 
-const Person = ({ person, setPersons }) => {
+const Person = ({ person, setPersons, setNotificationsTimeout }) => {
   const openDeleteAlertWindow = () => {
     if (window.confirm(`Delete ${person.name} ?`)) {
       personsService
         .remove(person.id)
         .then((deletedPerson) => {
+          setNotificationsTimeout(`Deleted ${deletedPerson.name}`);
           setPersons((persons) =>
             persons.filter((person) => person.id !== deletedPerson.id)
           );
         })
         .catch(() => {
-          alert(`${person.name} was already removed from server`);
+          setNotificationsTimeout(
+            `${person.name} was already removed from server`,
+            true
+          );
           setPersons((persons) => persons.filter((p) => p.id !== person.id));
         });
     }
@@ -24,13 +28,18 @@ const Person = ({ person, setPersons }) => {
   );
 };
 
-const Persons = ({ persons, setPersons, filter }) => {
+const Persons = ({ persons, setPersons, filter, setNotificationsTimeout }) => {
   return (
     <div>
       {persons.map((person) => {
         if (person.name.toLowerCase().includes(filter.toLowerCase())) {
           return (
-            <Person key={person.id} person={person} setPersons={setPersons} />
+            <Person
+              key={person.id}
+              person={person}
+              setPersons={setPersons}
+              setNotificationsTimeout={setNotificationsTimeout}
+            />
           );
         }
       })}

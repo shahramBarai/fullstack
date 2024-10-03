@@ -1,7 +1,7 @@
 import { useState } from "react";
 import personsService from "../services/persons";
 
-const PersonForm = ({ persons, setPersons }) => {
+const PersonForm = ({ persons, setPersons, setNotificationsTimeout }) => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
 
@@ -15,6 +15,7 @@ const PersonForm = ({ persons, setPersons }) => {
 
   const createPerson = (newPerson) => {
     personsService.create(newPerson).then((newPerson) => {
+      setNotificationsTimeout(`Added ${newPerson.name}`);
       setPersons(persons.concat(newPerson));
       setNewName("");
       setNewNumber("");
@@ -37,7 +38,7 @@ const PersonForm = ({ persons, setPersons }) => {
         if (error.response.status === 404) {
           if (
             window.confirm(
-              `${person.name} was already removed from server. Do you want to add this person?`
+              `Unformation of ${person.name} has already been removed from server. Do you want to add this person?`
             )
           ) {
             personsService
@@ -46,17 +47,23 @@ const PersonForm = ({ persons, setPersons }) => {
                 number: changedPerson.number,
               })
               .then((newPerson) => {
+                setNotificationsTimeout(`Added ${newPerson.name}`);
                 setPersons((persons) =>
                   persons.map((p) => (p.id !== person.id ? p : newPerson))
                 );
               });
+            setNewName("");
+            setNewNumber("");
           } else {
+            setNotificationsTimeout(
+              `Unformation of ${person.name} has already been removed from server`,
+              true
+            );
             setPersons((persons) => persons.filter((p) => p.id !== person.id));
           }
-          setNewName("");
-          setNewNumber("");
         } else {
-          alert(`Error: ${error.response.data.error}`);
+          setNotificationsTimeout("Error updating person", true);
+          console.error(error);
         }
       });
   };
@@ -64,11 +71,14 @@ const PersonForm = ({ persons, setPersons }) => {
   const onAddClick = (event) => {
     event.preventDefault();
     if (newName === "" || newNumber === "") {
-      alert("Please enter name and number");
+      setNotificationsTimeout("Name and number are required", true);
       return;
     }
     if (persons.find((person) => person.number === newNumber)) {
-      alert(`${newNumber} is already occupied by another person`);
+      setNotificationsTimeout(
+        `${newNumber} is already occupied by another person`,
+        true
+      );
       return;
     }
     if (persons.find((person) => person.name === newName)) {
