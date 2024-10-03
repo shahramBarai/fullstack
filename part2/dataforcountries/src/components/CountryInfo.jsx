@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import WeatherInfo from "./WeatherInfo";
 
 const CountryInfo = ({ countryName }) => {
   const [countryData, setCountryData] = useState(null);
@@ -11,6 +12,7 @@ const CountryInfo = ({ countryName }) => {
       )
       .then((response) => {
         setCountryData(response.data);
+        const latlng = response.data.capitalInfo.latlng;
       });
   }, []);
 
@@ -32,9 +34,10 @@ const CountryInfo = ({ countryName }) => {
       </ul>
       <img
         src={countryData.flags.png}
-        alt={countryData.name.common}
+        alt={countryData.flags.alt}
         width="200"
       />
+      <WeatherInfo countryInfo={countryData} />
     </div>
   );
 };

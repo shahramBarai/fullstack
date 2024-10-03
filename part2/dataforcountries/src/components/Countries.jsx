@@ -24,7 +24,6 @@ const Countries = ({ countryNames, filter, setFilter }) => {
 
   const handleShowClick = (name) => {
     setFilter(name);
-    console.log(name);
   };
 
   return (
