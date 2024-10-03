@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import CountryInfo from "./CountryInfo";
 
-const Countries = ({ countryNames, filter }) => {
+const Country = ({ countryName, onShowClick }) => {
+  return (
+    <div>
+      {countryName}
+      <button onClick={() => onShowClick(countryName)}>Show</button>
+    </div>
+  );
+};
+
+const Countries = ({ countryNames, filter, setFilter }) => {
   const [showCountryNames, setShowCountryNames] = useState([]);
 
   useEffect(() => {
@@ -13,6 +22,11 @@ const Countries = ({ countryNames, filter }) => {
     }
   }, [filter, countryNames]);
 
+  const handleShowClick = (name) => {
+    setFilter(name);
+    console.log(name);
+  };
+
   return (
     <div>
       {showCountryNames.length > 10 ? (
@@ -20,7 +34,13 @@ const Countries = ({ countryNames, filter }) => {
       ) : showCountryNames.length === 1 ? (
         <CountryInfo countryName={showCountryNames[0]} />
       ) : (
-        showCountryNames.map((name) => <div key={name}>{name}</div>)
+        showCountryNames.map((name) => (
+          <Country
+            key={name}
+            countryName={name}
+            onShowClick={handleShowClick}
+          />
+        ))
       )}
     </div>
   );
