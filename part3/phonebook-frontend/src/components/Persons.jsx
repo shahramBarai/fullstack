@@ -6,10 +6,8 @@ const Person = ({ person, setPersons, setNotificationsTimeout }) => {
       personsService
         .remove(person.id)
         .then((deletedPerson) => {
-          setNotificationsTimeout(`Deleted ${deletedPerson.name}`);
-          setPersons((persons) =>
-            persons.filter((person) => person.id !== deletedPerson.id)
-          );
+          setNotificationsTimeout(`Deleted ${person.name}`);
+          setPersons((persons) => persons.filter((p) => p.id !== person.id));
         })
         .catch(() => {
           setNotificationsTimeout(

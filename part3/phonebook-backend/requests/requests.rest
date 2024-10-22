@@ -17,3 +17,12 @@ Content-Type: application/json
   "name": "Shahram Barai",
   "number": "000-000000"
 }
+
+###
+PUT http://localhost:3001/api/persons/1
+Content-Type: application/json
+
+{
+  "name": "Shahram Barai",
+  "number": "111-111111"
+}

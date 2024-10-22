@@ -14,57 +14,51 @@ const PersonForm = ({ persons, setPersons, setNotificationsTimeout }) => {
   };
 
   const createPerson = (newPerson) => {
-    personsService.create(newPerson).then((newPerson) => {
-      setNotificationsTimeout(`Added ${newPerson.name}`);
-      setPersons(persons.concat(newPerson));
-      setNewName("");
-      setNewNumber("");
-    });
-  };
-
-  const updatePerson = (person, changedPerson) => {
     personsService
-      .update(person.id, changedPerson)
-      .then((returnedPerson) => {
-        setPersons(
-          persons.map((person) =>
-            person.id !== returnedPerson.id ? person : returnedPerson
-          )
-        );
+      .create(newPerson)
+      .then((newPerson) => {
+        setNotificationsTimeout(`Added ${newPerson.name}`);
+        setPersons(persons.concat(newPerson));
         setNewName("");
         setNewNumber("");
       })
       .catch((error) => {
-        if (error.response.status === 404) {
+        if (error.response.status === 409) {
+          const existing_person = error.response.data.person;
           if (
             window.confirm(
-              `Unformation of ${person.name} has already been removed from server. Do you want to add this person?`
+              `${existing_person.name} is already added to the phonebook, replace the old number (${existing_person.number}) with a new one?`
             )
           ) {
-            personsService
-              .create({
-                name: changedPerson.name,
-                number: changedPerson.number,
-              })
-              .then((newPerson) => {
-                setNotificationsTimeout(`Added ${newPerson.name}`);
-                setPersons((persons) =>
-                  persons.map((p) => (p.id !== person.id ? p : newPerson))
-                );
-              });
-            setNewName("");
-            setNewNumber("");
-          } else {
-            setNotificationsTimeout(
-              `Unformation of ${person.name} has already been removed from server`,
-              true
-            );
-            setPersons((persons) => persons.filter((p) => p.id !== person.id));
+            const changedPerson = {
+              ...existing_person,
+              number: newPerson.number,
+            };
+            updatePerson(existing_person.id, changedPerson);
           }
         } else {
-          setNotificationsTimeout("Error updating person", true);
-          console.error(error);
+          setNotificationsTimeout(error.response.data.error, true);
         }
+      });
+  };
+
+  const updatePerson = (person_id, changedPerson) => {
+    personsService
+      .update(person_id, changedPerson)
+      .then((returnedPerson) => {
+        setPersons((persons) =>
+          persons.map((p) => (p.id !== person_id ? p : returnedPerson))
+        );
+        setNotificationsTimeout(`Updated ${returnedPerson.name}`);
+        setNewName("");
+        setNewNumber("");
+      })
+      .catch((error) => {
+        setNotificationsTimeout("Error updating person", true);
+        personsService.getAll().then((persons) => {
+          setPersons(persons);
+        });
+        console.error(error);
       });
   };
 
@@ -81,19 +75,20 @@ const PersonForm = ({ persons, setPersons, setNotificationsTimeout }) => {
       );
       return;
     }
-    if (persons.find((person) => person.name === newName)) {
-      if (
-        window.confirm(
-          `${newName} is already added to the phonebook, replace the old number with a new one?`
-        )
-      ) {
-        const person = persons.find((person) => person.name === newName);
-        const changedPerson = { ...person, number: newNumber };
-        updatePerson(person, changedPerson);
-      }
-    } else {
-      createPerson({ name: newName, number: newNumber });
-    }
+    createPerson({ name: newName, number: newNumber });
+    // if (persons.find((person) => person.name === newName)) {
+    //   if (
+    //     window.confirm(
+    //       `${newName} is already added to the phonebook, replace the old number with a new one?`
+    //     )
+    //   ) {
+    //     const person = persons.find((person) => person.name === newName);
+    //     const changedPerson = { ...person, number: newNumber };
+    //     updatePerson(person, changedPerson);
+    //   }
+    // } else {
+
+    // }
   };
 
   return (
