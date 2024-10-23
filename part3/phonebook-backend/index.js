@@ -4,7 +4,7 @@ const cors = require("cors");
 const Person = require("./models/person");
 
 const morgan = require("morgan");
-morgan.token("body", (req, res) => {
+morgan.token("body", (req) => {
   return JSON.stringify(req.body);
 });
 
@@ -56,15 +56,11 @@ app.delete("/api/persons/:id", (req, res) => {
   });
 });
 
-app.post("/api/persons", (req, res, nexts) => {
+app.post("/api/persons", (req, res, next) => {
   const body = req.body;
-  if (!body.name || !body.number) {
-    res.status(400).json({ error: "name or number missing" }).end();
-  }
   Person.find({ name: body.name })
     .then((result) => {
       if (result.length > 0) {
-        console.log("name must be unique");
         res
           .status(409)
           .json({ error: "name must be unique", person: result[0] })
@@ -74,14 +70,15 @@ app.post("/api/persons", (req, res, nexts) => {
           name: body.name,
           number: body.number,
         });
-        person.save().then((savedPerson) => {
-          res.json(savedPerson);
-        });
+        person
+          .save()
+          .then((savedPerson) => {
+            res.json(savedPerson);
+          })
+          .catch((error) => next(error));
       }
     })
-    .catch((error) => {
-      next(error);
-    });
+    .catch((error) => next(error));
 });
 
 app.put("/api/persons/:id", (req, res, next) => {
@@ -91,7 +88,11 @@ app.put("/api/persons/:id", (req, res, next) => {
     number: body.number,
   };
 
-  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+  Person.findByIdAndUpdate(req.params.id, person, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  })
     .then((updatedPerson) => {
       if (updatedPerson) {
         res.json(updatedPerson);
